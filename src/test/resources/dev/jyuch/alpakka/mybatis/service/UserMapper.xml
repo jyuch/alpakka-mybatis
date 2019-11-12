@@ -9,4 +9,7 @@
   <select id="select" resultType="dev.jyuch.alpakka.mybatis.model.User">
     select * from user order by id
   </select>
+  <insert id="insert" parameterType="dev.jyuch.alpakka.mybatis.model.User">
+    insert into user (id, name) values (#{id}, #{name})
+  </insert>
 </mapper>
