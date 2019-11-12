@@ -28,7 +28,6 @@ import scala.util.control.NonFatal
           session = sessionFactory()
         } catch {
           case NonFatal(t) =>
-            closeSession()
             failStage(t)
         }
       }
@@ -39,7 +38,6 @@ import scala.util.control.NonFatal
           emit(out, action(session, next))
         } catch {
           case NonFatal(t) =>
-            closeSession()
             failStage(t)
         }
       }
@@ -48,18 +46,9 @@ import scala.util.control.NonFatal
         pull(in)
       }
 
-      override def onUpstreamFailure(t: Throwable): Unit = {
-        closeSession()
-        failStage(t)
-      }
-
-      override def onUpstreamFinish(): Unit = {
-        closeSession()
-        completeStage()
-      }
-
-      private def closeSession(): Unit = {
+      override def postStop(): Unit = {
         if (session ne null) session.close()
+        super.postStop()
       }
     }
 }

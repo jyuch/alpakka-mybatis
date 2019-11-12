@@ -7,6 +7,8 @@ import akka.stream.{Attributes, Outlet, SourceShape}
 import org.apache.ibatis.cursor.Cursor
 import org.apache.ibatis.session.SqlSession
 
+import scala.util.control.NonFatal
+
 @InternalApi private[mybatis] final class MyBatisSourceGraphStage[T](
   sessionFactory: () => SqlSession,
   cursorFactory: SqlSession => Cursor[T]
@@ -31,26 +33,23 @@ import org.apache.ibatis.session.SqlSession
       }
 
       override def postStop(): Unit = {
-        if (session != null) {
-          session.close()
-        }
-        if (cursor != null) {
-          cursor.close()
-        }
+        if (session ne null) session.close()
+        if (cursor ne null) cursor.close()
         super.postStop()
       }
 
       override def onPull(): Unit = {
-        if (iterator.hasNext) {
-          push(out, iterator.next())
-        } else {
-          completeStage()
+        try {
+          if (iterator.hasNext) {
+            emit(out, iterator.next())
+          } else {
+            completeStage()
+          }
         }
-      }
-
-      override def onDownstreamFinish(cause: Throwable): Unit = {
-        completeStage()
-        super.onDownstreamFinish(cause)
+        catch {
+          case NonFatal(t) =>
+            failStage(t)
+        }
       }
     }
 }
