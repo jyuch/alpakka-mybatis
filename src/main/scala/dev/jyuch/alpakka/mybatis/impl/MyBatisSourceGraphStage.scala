@@ -1,12 +1,13 @@
 package dev.jyuch.alpakka.mybatis.impl
 
+import akka.annotation.InternalApi
 import akka.event.Logging
 import akka.stream.stage.{GraphStage, GraphStageLogic, OutHandler}
 import akka.stream.{Attributes, Outlet, SourceShape}
 import org.apache.ibatis.cursor.Cursor
 import org.apache.ibatis.session.SqlSession
 
-class MyBatisSourceGraphStage[T](
+@InternalApi private[mybatis] final class MyBatisSourceGraphStage[T](
   sessionFactory: () => SqlSession,
   cursorFactory: SqlSession => Cursor[T]
 ) extends GraphStage[SourceShape[T]] {
