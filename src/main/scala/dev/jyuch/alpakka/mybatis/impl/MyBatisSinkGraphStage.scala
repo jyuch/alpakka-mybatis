@@ -1,10 +1,9 @@
 package dev.jyuch.alpakka.mybatis.impl
 
-import akka.NotUsed
 import akka.annotation.InternalApi
 import akka.event.Logging
-import akka.stream.stage.{GraphStage, GraphStageLogic, GraphStageWithMaterializedValue, InHandler}
-import akka.stream.{AbruptStageTerminationException, Attributes, IOOperationIncompleteException, IOResult, Inlet, SinkShape}
+import akka.stream.stage.{GraphStageLogic, GraphStageWithMaterializedValue, InHandler}
+import akka.stream._
 import org.apache.ibatis.session.SqlSession
 
 import scala.concurrent.{Future, Promise}
@@ -13,7 +12,7 @@ import scala.util.control.NonFatal
 
 @InternalApi private[mybatis] final class MyBatisSinkGraphStage[T](
   sessionFactory: () => SqlSession,
-  operationFactory: SqlSession => (T => Any),
+  operationFactory: SqlSession => T => Any,
   commitEachItem: Boolean
 ) extends GraphStageWithMaterializedValue[SinkShape[T], Future[IOResult]] {
   val in: Inlet[T] = Inlet(Logging.simpleName(this) + ".in")
@@ -21,10 +20,10 @@ import scala.util.control.NonFatal
 
   override def createLogicAndMaterializedValue(inheritedAttributes: Attributes): (GraphStageLogic, Future[IOResult]) = {
     val mat = Promise[IOResult]
-    val logic = new GraphStageLogic(shape) with InHandler {
+    val logic: GraphStageLogic with InHandler = new GraphStageLogic(shape) with InHandler {
 
       var session: SqlSession = _
-      var operation: (T => Any) = _
+      var operation: T => Any = _
       var inserted: Int = 0
 
       setHandler(in, this)
