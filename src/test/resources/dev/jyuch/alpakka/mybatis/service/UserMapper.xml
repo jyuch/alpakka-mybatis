@@ -7,6 +7,6 @@
     insert into user (id, name) values (2, 'bob');
   </update>
   <select id="select" resultType="dev.jyuch.alpakka.mybatis.model.User">
-    select * from user
+    select * from user order by id
   </select>
 </mapper>

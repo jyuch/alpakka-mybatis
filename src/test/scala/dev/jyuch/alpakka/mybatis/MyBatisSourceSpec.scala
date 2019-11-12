@@ -14,11 +14,12 @@ import scala.concurrent.duration._
 
 class MyBatisSourceSpec extends FlatSpec with BeforeAndAfter {
 
-  implicit val system: ActorSystem = ActorSystem("MyBatisSourceSpec")
+  implicit var system: ActorSystem = _
   var sqlSessionFactory: SqlSessionFactory = _
   var sessionHolder: SqlSession = _
 
   before {
+    system = ActorSystem("MyBatisSourceSpec")
     sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config.xml"))
     sessionHolder = sqlSessionFactory.openSession()
     val mapper: UserMapper = sessionHolder.getMapper(classOf[UserMapper])
@@ -39,6 +40,16 @@ class MyBatisSourceSpec extends FlatSpec with BeforeAndAfter {
     val future = source.runWith(Sink.seq)
     val result = Await.result(future, 10 seconds)
     assert(result == Seq(new User(1, "alice"), new User(2, "bob")))
+  }
+
+  "MyBatisSource" should "stop and resource cleanup when downstream is finished" in {
+    val source = MyBatisSource.fromSessionFactory(
+      () => sqlSessionFactory.openSession(),
+      session => session.getMapper(classOf[UserMapper]).select()
+    ).take(1)
+    val future = source.runWith(Sink.seq)
+    val result = Await.result(future, 10 seconds)
+    assert(result == Seq(new User(1, "alice")))
   }
 
 }

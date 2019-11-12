@@ -31,7 +31,7 @@ import org.apache.ibatis.session.SqlSession
       }
 
       override def postStop(): Unit = {
-        if (session == null) {
+        if (session != null) {
           session.close()
         }
         if (cursor != null) {
