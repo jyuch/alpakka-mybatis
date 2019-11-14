@@ -13,6 +13,7 @@ lazy val root = (project in file("."))
       "org.scalatest" %% "scalatest" % "3.0.8" % Test,
       "com.h2database" % "h2" % "1.4.200" % Test,
     ),
-    scalacOptions ++= Seq("-feature", "-deprecation", "-language:postfixOps"),
+    scalacOptions ++= Seq("-feature", "-deprecation", "-language:postfixOps", "-Xlint"),
+    crossScalaVersions := Seq("2.12.10", "2.13.1"),
     parallelExecution in Test := false,
   )
