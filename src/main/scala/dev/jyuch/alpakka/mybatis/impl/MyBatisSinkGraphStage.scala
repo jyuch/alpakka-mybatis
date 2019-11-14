@@ -2,28 +2,28 @@ package dev.jyuch.alpakka.mybatis.impl
 
 import akka.annotation.InternalApi
 import akka.event.Logging
-import akka.stream.stage.{GraphStageLogic, GraphStageWithMaterializedValue, InHandler}
 import akka.stream._
+import akka.stream.stage.{GraphStageLogic, GraphStageWithMaterializedValue, InHandler}
 import org.apache.ibatis.session.SqlSession
 
 import scala.concurrent.{Future, Promise}
 import scala.util.Success
 import scala.util.control.NonFatal
 
-@InternalApi private[mybatis] final class MyBatisSinkGraphStage[T](
+@InternalApi private[mybatis] final class MyBatisSinkGraphStage[In](
   sessionFactory: () => SqlSession,
-  operationFactory: SqlSession => T => Any,
+  operationFactory: SqlSession => In => Any,
   commitEachItem: Boolean
-) extends GraphStageWithMaterializedValue[SinkShape[T], Future[IOResult]] {
-  val in: Inlet[T] = Inlet(Logging.simpleName(this) + ".in")
-  override val shape: SinkShape[T] = SinkShape(in)
+) extends GraphStageWithMaterializedValue[SinkShape[In], Future[IOResult]] {
+  val in: Inlet[In] = Inlet(Logging.simpleName(this) + ".in")
+  override val shape: SinkShape[In] = SinkShape(in)
 
   override def createLogicAndMaterializedValue(inheritedAttributes: Attributes): (GraphStageLogic, Future[IOResult]) = {
     val mat = Promise[IOResult]
     val logic: GraphStageLogic with InHandler = new GraphStageLogic(shape) with InHandler {
 
       var session: SqlSession = _
-      var operation: T => Any = _
+      var operation: In => Any = _
       var inserted: Int = 0
 
       setHandler(in, this)
