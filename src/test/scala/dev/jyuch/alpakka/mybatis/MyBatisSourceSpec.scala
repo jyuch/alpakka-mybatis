@@ -3,7 +3,7 @@ package dev.jyuch.alpakka.mybatis
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Keep, Sink}
 import dev.jyuch.alpakka.mybatis.model._
-import dev.jyuch.alpakka.mybatis.scaladsl.MyBatisSource
+import dev.jyuch.alpakka.mybatis.scaladsl.MyBatis
 import dev.jyuch.alpakka.mybatis.service.UserMapper
 import org.apache.ibatis.io.Resources
 import org.apache.ibatis.session.{SqlSession, SqlSessionFactory, SqlSessionFactoryBuilder}
@@ -35,7 +35,7 @@ class MyBatisSourceSpec extends FlatSpec with BeforeAndAfter {
   }
 
   "Source" should "return table contents" in {
-    val source = MyBatisSource.fromSessionFactory(
+    val source = MyBatis.source(
       () => sqlSessionFactory.openSession(),
       session => session.getMapper(classOf[UserMapper]).select()
     )
@@ -50,7 +50,7 @@ class MyBatisSourceSpec extends FlatSpec with BeforeAndAfter {
   }
 
   "Source" should "stop and resource cleanup when downstream is finished" in {
-    val source = MyBatisSource.fromSessionFactory(
+    val source = MyBatis.source(
       () => sqlSessionFactory.openSession(),
       session => session.getMapper(classOf[UserMapper]).select()
     ).take(1)

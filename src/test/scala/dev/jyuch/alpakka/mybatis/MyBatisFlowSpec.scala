@@ -2,8 +2,8 @@ package dev.jyuch.alpakka.mybatis
 
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Sink, Source}
+import dev.jyuch.alpakka.mybatis.scaladsl.MyBatis
 import dev.jyuch.alpakka.mybatis.model.User
-import dev.jyuch.alpakka.mybatis.scaladsl.MyBatisFlow
 import dev.jyuch.alpakka.mybatis.service.UserMapper
 import org.apache.ibatis.io.Resources
 import org.apache.ibatis.session.{SqlSession, SqlSessionFactory, SqlSessionFactoryBuilder}
@@ -33,9 +33,9 @@ class MyBatisFlowSpec extends FlatSpec with BeforeAndAfter {
     system.terminate()
   }
 
-  "MyBatisFlow" should "" in {
+  "Flow" should "process items using mybatis" in {
     val source = Source(immutable.Seq(1, 2))
-    val flow = MyBatisFlow.fromSessionFactory[Int, User](
+    val flow = MyBatis.flow[Int, User](
       () => sqlSessionFactory.openSession(),
       (session, i) => {
         val mapper = session.getMapper(classOf[UserMapper])

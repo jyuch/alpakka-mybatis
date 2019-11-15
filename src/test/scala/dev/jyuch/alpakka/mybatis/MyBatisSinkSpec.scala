@@ -1,9 +1,9 @@
 package dev.jyuch.alpakka.mybatis
 
 import akka.actor.ActorSystem
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{Keep, Source}
 import dev.jyuch.alpakka.mybatis.model.User
-import dev.jyuch.alpakka.mybatis.scaladsl.MyBatisSink
+import dev.jyuch.alpakka.mybatis.scaladsl.MyBatis
 import dev.jyuch.alpakka.mybatis.service.UserMapper
 import org.apache.ibatis.io.Resources
 import org.apache.ibatis.session.{SqlSession, SqlSessionFactory, SqlSessionFactoryBuilder}
@@ -34,13 +34,13 @@ class MyBatisSinkSpec extends FlatSpec with BeforeAndAfter {
     system.terminate()
   }
 
-  "MyBatisSink" should "insert item from upstream to db" in {
+  "Sink" should "insert item from upstream to db" in {
     val source = Source(collection.immutable.Seq(new User(3, "carol")))
-    val sink = MyBatisSink.fromSessionFactory(
+    val sink = MyBatis.sink(
       () => sqlSessionFactory.openSession(),
       session => session.getMapper(classOf[UserMapper]).insert
     )
-    val future = source.runWith(sink)
+    val future = source.toMat(sink)(Keep.right).run()
     val count = Await.result(future, 10 second)
 
     val cursor = sessionHolder.getMapper(classOf[UserMapper]).select().asScala
