@@ -3,8 +3,8 @@ package dev.jyuch.alpakka.mybatis.impl
 import akka.annotation.InternalApi
 import akka.event.Logging
 import akka.stream.SubscriptionWithCancelException.StageWasCompleted
-import akka.stream.stage.{GraphStage, GraphStageLogic, GraphStageWithMaterializedValue, InHandler, OutHandler}
-import akka.stream.{AbruptStageTerminationException, Attributes, FlowShape, IOOperationIncompleteException, IOResult, Inlet, Outlet}
+import akka.stream.stage.{GraphStageLogic, GraphStageWithMaterializedValue, InHandler, OutHandler}
+import akka.stream._
 import org.apache.ibatis.session.SqlSession
 
 import scala.concurrent.{Future, Promise}
@@ -41,6 +41,7 @@ import scala.util.control.NonFatal
 
       override def onPush(): Unit = {
         val next = grab(in)
+        income += 1
         try {
           emit(out, action(session, next))
         } catch {
