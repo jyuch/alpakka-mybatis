@@ -3,8 +3,8 @@ package dev.jyuch.alpakka.mybatis.model;
 import java.util.Objects;
 
 public class User {
-    int id;
-    String name;
+    private int id;
+    private String name;
 
     public User(int id, String name) {
         this.id = id;
@@ -39,5 +39,13 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id, name);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

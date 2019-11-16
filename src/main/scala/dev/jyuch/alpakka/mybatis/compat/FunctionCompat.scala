@@ -1,6 +1,6 @@
 package dev.jyuch.alpakka.mybatis.compat
 
-import java.util.function.{BiFunction, Supplier, Function}
+import java.util.function.{BiConsumer, BiFunction, Function, Supplier}
 
 object FunctionCompat {
 
@@ -8,12 +8,12 @@ object FunctionCompat {
     () => func.get()
   }
 
-  def functionToFunction1[T, R](func: Function[T, R]): T => R = {
-    x => func.apply(x)
+  def biConsumerToFunction2[T1, T2](func: BiConsumer[T1, T2]): (T1, T2) => Unit = {
+    (x, y) => func.accept(x, y)
   }
 
-  def nestedFunctionToFunction1[T1, T2, R](func: Function[T1, Function[T2, R]]): T1 => T2 => R = {
-    x => y => func(x)(y)
+  def functionToFunction1[T, R](func: Function[T, R]): T => R = {
+    x => func.apply(x)
   }
 
   def biFunctionToFunction2[T1, T2, R](func: BiFunction[T1, T2, R]): (T1, T2) => R = {

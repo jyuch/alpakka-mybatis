@@ -1,8 +1,8 @@
 package dev.jyuch.alpakka.mybatis.scaladsl
 
 import akka.stream.IOResult
-import akka.stream.scaladsl.{Flow, Sink, Source}
-import dev.jyuch.alpakka.mybatis.impl.{MyBatisFlowGraphStage, MyBatisSinkGraphStage, MyBatisSourceGraphStage}
+import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
+import dev.jyuch.alpakka.mybatis.impl.{MyBatisFlowGraphStage, MyBatisSourceGraphStage}
 import org.apache.ibatis.cursor.Cursor
 import org.apache.ibatis.session.SqlSession
 
@@ -24,12 +24,11 @@ object MyBatis {
     Flow.fromGraph(new MyBatisFlowGraphStage[In, Out](sessionFactory, action))
   }
 
-  def sink[T](
+  def sink[In](
     sessionFactory: () => SqlSession,
-    operationFactory: SqlSession => T => Any,
-    commitEachItem: Boolean = true
-  ): Sink[T, Future[IOResult]] = {
-    Sink.fromGraph(new MyBatisSinkGraphStage[T](sessionFactory, operationFactory, commitEachItem))
+    action: (SqlSession, In) => Unit
+  ): Sink[In, Future[IOResult]] = {
+    Flow[In].viaMat(flow(sessionFactory, action))(Keep.right).toMat(Sink.ignore)(Keep.left)
   }
 
 }

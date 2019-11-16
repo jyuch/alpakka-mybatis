@@ -36,9 +36,12 @@ class SinkSpec extends FlatSpec with BeforeAndAfter {
 
   "Sink" should "insert item from upstream to db" in {
     val source = Source(collection.immutable.Seq(new User(3, "carol")))
-    val sink = MyBatis.sink(
+    val sink = MyBatis.sink[User](
       () => sqlSessionFactory.openSession(),
-      session => session.getMapper(classOf[UserMapper]).insert
+      (session, it) => {
+        session.getMapper(classOf[UserMapper]).insert(it)
+        session.commit()
+      }
     )
     val future = source.toMat(sink)(Keep.right).run()
     val count = Await.result(future, 10 second)
