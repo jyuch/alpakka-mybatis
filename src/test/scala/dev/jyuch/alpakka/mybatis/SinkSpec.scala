@@ -14,14 +14,14 @@ import scala.collection.mutable
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class MyBatisSinkSpec extends FlatSpec with BeforeAndAfter {
+class SinkSpec extends FlatSpec with BeforeAndAfter {
 
   implicit var system: ActorSystem = _
   var sqlSessionFactory: SqlSessionFactory = _
   var sessionHolder: SqlSession = _
 
   before {
-    system = ActorSystem("MyBatisSinkSpec")
+    system = ActorSystem("SinkSpec")
     sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config.xml"))
     sessionHolder = sqlSessionFactory.openSession()
     val mapper: UserMapper = sessionHolder.getMapper(classOf[UserMapper])

@@ -12,7 +12,7 @@ import org.scalatest.{BeforeAndAfter, FlatSpec}
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
 
-class MyBatisSourceSpec extends FlatSpec with BeforeAndAfter {
+class SourceSpec extends FlatSpec with BeforeAndAfter {
 
   implicit var system: ActorSystem = _
   implicit var ec: ExecutionContext = _
@@ -20,7 +20,7 @@ class MyBatisSourceSpec extends FlatSpec with BeforeAndAfter {
   var sessionHolder: SqlSession = _
 
   before {
-    system = ActorSystem("MyBatisSourceSpec")
+    system = ActorSystem("SourceSpec")
     ec = system.dispatcher
     sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config.xml"))
     sessionHolder = sqlSessionFactory.openSession()
