@@ -40,8 +40,8 @@ class SinkSpec extends FlatSpec with BeforeAndAfter {
       () => sqlSessionFactory.openSession(),
       (session, it) => {
         session.getMapper(classOf[UserMapper]).insert(it)
-        session.commit()
-      }
+      },
+      true
     )
     val future = source.toMat(sink)(Keep.right).run()
     val count = Await.result(future, 10 second)

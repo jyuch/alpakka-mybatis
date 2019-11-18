@@ -42,7 +42,8 @@ class FlowSpec extends FlatSpec with BeforeAndAfter {
       (session, i) => {
         val mapper = session.getMapper(classOf[UserMapper])
         mapper.selectById(i)
-      }
+      },
+      true
     )
     val (countFuture, resultFuture) = source.viaMat(flow)(Keep.right).toMat(Sink.seq)(Keep.both).run()
     val (count, result) = Await.result(

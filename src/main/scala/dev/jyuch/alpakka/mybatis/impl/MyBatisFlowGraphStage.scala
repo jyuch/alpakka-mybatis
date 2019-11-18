@@ -13,7 +13,8 @@ import scala.util.control.NonFatal
 
 @InternalApi private[mybatis] final class MyBatisFlowGraphStage[In, Out](
   sessionFactory: () => SqlSession,
-  action: (SqlSession, In) => Out
+  action: (SqlSession, In) => Out,
+  commitAtStreamEnd: Boolean
 ) extends GraphStageWithMaterializedValue[FlowShape[In, Out], Future[IOResult]] {
   val in: Inlet[In] = Inlet(Logging.simpleName(this) + ".in")
   val out: Outlet[Out] = Outlet(Logging.simpleName(this) + ".out")
@@ -86,11 +87,17 @@ import scala.util.control.NonFatal
 
       private def closeSession(failed: Option[Throwable]): Unit = {
         try {
-          if (session ne null) session.close()
           failed match {
-            case Some(t) => mat.tryFailure(t)
-            case None => mat.tryComplete(Success(IOResult(income)))
+            case Some(t) =>
+              mat.tryFailure(t)
+              if (commitAtStreamEnd) {
+                session.rollback()
+              }
+            case None =>
+              mat.tryComplete(Success(IOResult(income)))
+              session.commit()
           }
+          if (session ne null) session.close()
         } catch {
           case NonFatal(t) =>
             mat.tryFailure(failed.getOrElse(t))

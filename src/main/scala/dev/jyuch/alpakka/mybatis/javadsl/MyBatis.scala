@@ -25,20 +25,24 @@ object MyBatis {
 
   def flow[In, Out](
     sessionFactory: Supplier[SqlSession],
-    action: BiFunction[SqlSession, In, Out]
+    action: BiFunction[SqlSession, In, Out],
+    commitAtStreamEnd: Boolean
   ): akka.stream.javadsl.Flow[In, Out, CompletionStage[IOResult]] = {
     Flow.fromGraph(new MyBatisFlowGraphStage[In, Out](
       FunctionCompat.supplierToFunction0(sessionFactory),
-      FunctionCompat.biFunctionToFunction2(action))).mapMaterializedValue(toJava).asJava
+      FunctionCompat.biFunctionToFunction2(action),
+      commitAtStreamEnd)).mapMaterializedValue(toJava).asJava
   }
 
   def sink[In](
     sessionFactory: Supplier[SqlSession],
-    action: BiConsumer[SqlSession, In]
+    action: BiConsumer[SqlSession, In],
+    commitAtStreamEnd: Boolean
   ): akka.stream.javadsl.Sink[In, CompletionStage[IOResult]] = {
     val flow = Flow.fromGraph(new MyBatisFlowGraphStage[In, Unit](
       FunctionCompat.supplierToFunction0(sessionFactory),
-      FunctionCompat.biConsumerToFunction2(action)
+      FunctionCompat.biConsumerToFunction2(action),
+      commitAtStreamEnd
     ))
     Flow[In].viaMat(flow)(Keep.right).toMat(Sink.ignore)(Keep.left).mapMaterializedValue(toJava).asJava
   }
