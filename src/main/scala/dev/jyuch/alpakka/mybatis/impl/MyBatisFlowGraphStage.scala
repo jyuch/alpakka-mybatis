@@ -95,7 +95,9 @@ import scala.util.control.NonFatal
               }
             case None =>
               mat.tryComplete(Success(IOResult(income)))
-              session.commit()
+              if (commitAtStreamEnd) {
+                session.commit()
+              }
           }
           if (session ne null) session.close()
         } catch {
