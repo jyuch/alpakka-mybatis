@@ -10,6 +10,12 @@ import scala.concurrent.Future
 
 object MyBatis {
 
+  /**
+   * Create source.
+   *
+   * @param sessionFactory Session factory
+   * @param cursorFactory  Cursor factory
+   */
   def source[Out](
     sessionFactory: () => SqlSession,
     cursorFactory: SqlSession => Cursor[Out]
@@ -17,6 +23,13 @@ object MyBatis {
     Source.fromGraph(new MyBatisSourceGraphStage[Out](sessionFactory, cursorFactory))
   }
 
+  /**
+   * Create flow.
+   *
+   * @param sessionFactory    Session factory
+   * @param action            Item handler
+   * @param commitAtStreamEnd Commit or rollback when stream is ended
+   */
   def flow[In, Out](
     sessionFactory: () => SqlSession,
     action: (SqlSession, In) => Out,
@@ -25,6 +38,13 @@ object MyBatis {
     Flow.fromGraph(new MyBatisFlowGraphStage[In, Out](sessionFactory, action, commitAtStreamEnd))
   }
 
+  /**
+   * Create sink.
+   *
+   * @param sessionFactory    Session factory
+   * @param action            Item handler
+   * @param commitAtStreamEnd Commit or rollback when stream is ended
+   */
   def sink[In](
     sessionFactory: () => SqlSession,
     action: (SqlSession, In) => Unit,

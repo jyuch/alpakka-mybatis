@@ -14,6 +14,12 @@ import scala.compat.java8.FutureConverters._
 
 object MyBatis {
 
+  /**
+   * Create source.
+   *
+   * @param sessionFactory Session factory
+   * @param cursorFactory  Cursor factory
+   */
   def source[Out](
     sessionFactory: Supplier[SqlSession],
     cursorFactory: Function[SqlSession, Cursor[Out]]
@@ -23,6 +29,13 @@ object MyBatis {
       FunctionCompat.functionToFunction1(cursorFactory))).mapMaterializedValue(toJava).asJava
   }
 
+  /**
+   * Create flow.
+   *
+   * @param sessionFactory    Session factory
+   * @param action            Item handler
+   * @param commitAtStreamEnd Commit or rollback when stream is ended
+   */
   def flow[In, Out](
     sessionFactory: Supplier[SqlSession],
     action: BiFunction[SqlSession, In, Out],
@@ -34,6 +47,13 @@ object MyBatis {
       commitAtStreamEnd)).mapMaterializedValue(toJava).asJava
   }
 
+  /**
+   * Create sink.
+   *
+   * @param sessionFactory    Session factory
+   * @param action            Item handler
+   * @param commitAtStreamEnd Commit or rollback when stream is ended
+   */
   def sink[In](
     sessionFactory: Supplier[SqlSession],
     action: BiConsumer[SqlSession, In],

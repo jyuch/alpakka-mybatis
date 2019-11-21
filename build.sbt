@@ -1,5 +1,5 @@
 ThisBuild / scalaVersion     := "2.12.10"
-ThisBuild / version          := "0.1.0-SNAPSHOT"
+ThisBuild / version          := "0.1.0"
 ThisBuild / organization     := "dev.jyuch"
 ThisBuild / organizationName := "jyuch"
 
@@ -16,4 +16,31 @@ lazy val root = (project in file("."))
     scalacOptions ++= Seq("-feature", "-deprecation", "-language:postfixOps", "-Xlint"),
     crossScalaVersions := Seq("2.12.10", "2.13.1"),
     parallelExecution in Test := false,
+
+    publishMavenStyle := true,
+    publishArtifact in Test := false,
+    publishTo := Some(
+      if (isSnapshot.value)
+        Opts.resolver.sonatypeSnapshots
+      else
+        Opts.resolver.sonatypeStaging
+    ),
+
+    pomExtra := <url>https://github.com/jyuch/alpakka-mybatis</url>
+      <licenses>
+        <license>
+          <name>MIT License</name>
+          <url>https://opensource.org/licenses/mit-license.php</url>
+        </license>
+      </licenses>
+      <scm>
+        <url>https://github.com/jyuch/alpakka-mybatis</url>
+        <connection>scm:git:https://github.com/jyuch/alpakka-mybatis.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>jyuch</id>
+          <url>https://github.com/jyuch</url>
+        </developer>
+      </developers>
   )
