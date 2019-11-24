@@ -11,12 +11,12 @@ Maven
 ``` xml
 <dependency>
   <groupId>dev.jyuch</groupId>
-  <artifactId>alpakka-mybatis</artifactId>
+  <artifactId>alpakka-mybatis_2.12</artifactId>
   <version>0.1.0</version>
 </dependency>
 ```
 
-Grooby
+Gradle
 
 ``` groovy
 compile group: 'dev.jyuch', name: 'alpakka-mybatis_2.12', version: '0.1.0'
